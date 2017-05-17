@@ -122,7 +122,7 @@ class ZenDeskCoreUsers:
             client.api_root + '/users/{user_id}/organization_memberships/{id}/make_default.json'
         self._api_user_tags = client.api_root + '/users/{id}/tags.json'
 
-    def get(self, user_id, user_ids=None, filter_by_role=None):
+    def get(self, user_id=None, user_ids=None, filter_by_role=None):
         if user_id:
             return self.client._get(self._api_user.format(id=user_id))
         if user_ids:
