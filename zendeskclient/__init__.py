@@ -12,89 +12,124 @@ class ZenDeskCoreTickets:
     def __init__(self, client, parent):
         self.client = client
         self.parent = parent
-        self.api_tickets = client.api_root + '/tickets.json'
-        self.api_ticket = client.api_root + '/tickets/{id}.json'
-        self.api_ticket_related_info = client.api_root + '/tickets/{id}/related.json'
-        self.api_ticket_collaborators = client.api_root + '/tickets/{id}/collaborators.json'
-        self.api_ticket_incidents = client.api_root + '/tickets/{id}/incidents.json'
-        self.api_ticket_problems = client.api_root + '/tickets/problems.json'
-        self.api_ticket_mark_as_spam = client.api_root + '/tickets/{id}/mark_as_spam.json'
-        self.api_ticket_mark_many_as_spam = client.api_root + '/tickets/mark_many_as_spam.json'
-        self.api_tickets_show_many = client.api_root + '/tickets/show_many.json'
-        self.api_tickets_create_many = client.api_root + '/tickets/create_many.json'
-        self.api_tickets_update_many = client.api_root + '/tickets/update_many.json'
-        self.api_tickets_destroy_many = client.api_root + '/tickets/destroy_many.json'
-        self.api_tickets_recently_viewed = client.api_root + '/tickets/recent.json'
-        self.api_merge_tickets = client.api_root + '/tickets/{id}/merge.json'
-        self.api_ticket_comments = client.api_root + '/tickets/{ticket_id}/comments.json'
-        self.api_ticket_comment_private = client.api_root + '/tickets/{ticket_id}/comments/{id}/make_private.json'
-        self.api_ticket_ticket_metrics = client.api_root + '/tickets/{ticket_id}/metrics.json'
-        self.ticket_tags = client.api_root + '/tickets/{id}/tags.json'
+        self._api_tickets = client.api_root + '/tickets.json'
+        self._api_ticket = client.api_root + '/tickets/{id}.json'
+        self._api_ticket_related_info = client.api_root + '/tickets/{id}/related.json'
+        self._api_ticket_collaborators = client.api_root + '/tickets/{id}/collaborators.json'
+        self._api_ticket_incidents = client.api_root + '/tickets/{id}/incidents.json'
+        self._api_ticket_problems = client.api_root + '/tickets/problems.json'
+        self._api_ticket_mark_as_spam = client.api_root + '/tickets/{id}/mark_as_spam.json'
+        self._api_ticket_mark_many_as_spam = client.api_root + '/tickets/mark_many_as_spam.json'
+        self._api_tickets_show_many = client.api_root + '/tickets/show_many.json'
+        self._api_tickets_create_many = client.api_root + '/tickets/create_many.json'
+        self._api_tickets_update_many = client.api_root + '/tickets/update_many.json'
+        self._api_tickets_destroy_many = client.api_root + '/tickets/destroy_many.json'
+        self._api_tickets_recently_viewed = client.api_root + '/tickets/recent.json'
+        self._api_merge_tickets = client.api_root + '/tickets/{id}/merge.json'
+        self._api_ticket_comments = client.api_root + '/tickets/{ticket_id}/comments.json'
+        self._api_ticket_comment_private = client.api_root + '/tickets/{ticket_id}/comments/{id}/make_private.json'
+        self._api_ticket_ticket_metrics = client.api_root + '/tickets/{ticket_id}/metrics.json'
+        self._api_ticket_tags = client.api_root + '/tickets/{id}/tags.json'
+
+    def get(self, ticket_id=None, ticket_ids=None):
+        if ticket_id:
+            return self.client._get(self._api_ticket.format(id=ticket_id))
+        if ticket_ids:
+            comma_ids = ','.join(ticket_ids)
+            return self.client._get(
+                self._api_tickets_show_many,
+                querystring={'ids': comma_ids}
+            )
+        return self.client._get(self._api_tickets)
+
+    def get_collaborators(self, ticket_id):
+        return self.client._get(self._api_ticket_collaborators.format(id=ticket_id))
+
+    def update(self, ticket_id, fields):
+        return self.client._put(self._api_ticket.format(id=ticket_id), json={'ticket': fields})
+
+    def get_ticket_tags(self, ticket_id):
+        return self.client._get(self._api_ticket_tags.format(id=ticket_id))
+
+    def add_ticket_tag(self, ticket_id, tag):
+        return self.client._put(self._api_ticket_tags.format(id=ticket_id), json={'tags': [tag]})
+
+    def remove_ticket_tag(self, ticket_id, tag):
+        return self.client._delete(self._api_ticket_tags.format(id=ticket_id), json={'tags': [tag]})
 
 
 class ZenDeskCoreOrganizations:
     def __init__(self, client, parent):
         self.client = client
         self.parent = parent
-        self.api_org_tickets = client.api_root + '/organizations/{organization_id}/tickets.json'
-        self.api_org_users = client.api_root + '/organizations/{id}/users.json'
-        self.api_organizations = client.api_root + '/organizations.json'
-        self.api_organization = client.api_root + '/organizations/{id}.json'
-        self.api_organization_related = client.api_root + '/organizations/{id}/related.json'
-        self.api_organizations_autocomplete = client.api_root + '/organizations/autocomplete.json'
-        self.api_organizations_show_many = client.api_root + '/organizations/show_many.json'
-        self.api_organizations_create_many = client.api_root + '/organizations/create_many.json'
-        self.api_organizations_create_or_update = client.api_root + '/organizations/create_or_update.json'
-        self.api_organizations_update_many = client.api_root + '/organizations/update_many.json'
-        self.api_organizations_destroy_many = client.api_root + '/organizations/destroy_many.json'
-        self.api_organizations_search_by_external_id = client.api_root + '/organizations/search.json'
-        self.api_organization_organization_subscriptions = \
+        self._api_org_tickets = client.api_root + '/organizations/{organization_id}/tickets.json'
+        self._api_org_users = client.api_root + '/organizations/{id}/users.json'
+        self._api_organizations = client.api_root + '/organizations.json'
+        self._api_organization = client.api_root + '/organizations/{id}.json'
+        self._api_organization_related = client.api_root + '/organizations/{id}/related.json'
+        self._api_organizations_autocomplete = client.api_root + '/organizations/autocomplete.json'
+        self._api_organizations_show_many = client.api_root + '/organizations/show_many.json'
+        self._api_organizations_create_many = client.api_root + '/organizations/create_many.json'
+        self._api_organizations_create_or_update = client.api_root + '/organizations/create_or_update.json'
+        self._api_organizations_update_many = client.api_root + '/organizations/update_many.json'
+        self._api_organizations_destroy_many = client.api_root + '/organizations/destroy_many.json'
+        self._api_organizations_search_by_external_id = client.api_root + '/organizations/search.json'
+        self._api_organization_organization_subscriptions = \
             client.api_root + '/organizations/{organization_id}/subscriptions.json'
-        self.api_organization_organization_memberships = \
+        self._api_organization_organization_memberships = \
             client.api_root + '/organizations/{organization_id}/organization_memberships.json'
-        self.org_tags = client.api_root + '/organizations/{id}/tags.json'
+        self._api_organization_tags = client.api_root + '/organizations/{id}/tags.json'
 
 
 class ZenDeskCoreUsers:
     def __init__(self, client, parent):
         self.client = client
         self.parent = parent
-        self.api_user_tickets_requested = client.api_root + '/users/{user_id}/tickets/requested.json'
-        self.api_user_tickets_ccd = client.api_root + '/users/{user_id}/tickets/ccd.json'
-        self.api_user_tickets_assigned = client.api_root + '/users/{user_id}/tickets/assigned.json'
-        self.api_users = client.api_root + '/users.json'
-        self.api_users_search = client.api_root + '/users/search.json'
-        self.api_users_autocomplete = client.api_root + '/users/autocomplete.json'
-        self.api_users_request_create = client.api_root + '/users/request_create.json'
-        self.api_users_me = client.api_root + '/users/me.json'
-        self.api_user = client.api_root + '/users/{id}.json'
-        self.api_user_related = client.api_root + '/users/{id}/related.json'
-        self.api_user_set_password = client.api_root + '/users/{user_id}/password.json'
-        self.api_user_get_password_requirements = client.api_root + '/users/{user_id}/password/requirements.json'
-        self.api_users_create_many = client.api_root + '/users/create_many.json'
-        self.api_users_create_or_update = client.api_root + '/users/create_or_update.json'
-        self.api_users_create_or_update_many = client.api_root + '/users/create_or_update_many.json'
-        self.api_users_update_many = client.api_root + '/users/update_many.json'
-        self.api_users_show_many = client.api_root + '/users/show_many.json'
-        self.api_users_destroy_many = client.api_root + '/users/destroy_many.json'
-        self.api_user_identities = client.api_root + '/users/{user_id}/identities.json'
-        self.api_user_identity = client.api_root + '/users/{user_id}/identities/{id}.json'
-        self.api_user_identity_make_primary = client.api_root + '/users/{user_id}/identities/{id}/make_primary'
-        self.api_user_identity_verify = client.api_root + '/users/{user_id}/identities/{id}/verify'
-        self.api_user_identity_request_verification = \
+        self._api_user_tickets_requested = client.api_root + '/users/{user_id}/tickets/requested.json'
+        self._api_user_tickets_ccd = client.api_root + '/users/{user_id}/tickets/ccd.json'
+        self._api_user_tickets_assigned = client.api_root + '/users/{user_id}/tickets/assigned.json'
+        self._api_users = client.api_root + '/users.json'
+        self._api_users_search = client.api_root + '/users/search.json'
+        self._api_users_autocomplete = client.api_root + '/users/autocomplete.json'
+        self._api_users_request_create = client.api_root + '/users/request_create.json'
+        self._api_users_me = client.api_root + '/users/me.json'
+        self._api_user = client.api_root + '/users/{id}.json'
+        self._api_user_related = client.api_root + '/users/{id}/related.json'
+        self._api_user_set_password = client.api_root + '/users/{user_id}/password.json'
+        self._api_user_get_password_requirements = client.api_root + '/users/{user_id}/password/requirements.json'
+        self._api_users_create_many = client.api_root + '/users/create_many.json'
+        self._api_users_create_or_update = client.api_root + '/users/create_or_update.json'
+        self._api_users_create_or_update_many = client.api_root + '/users/create_or_update_many.json'
+        self._api_users_update_many = client.api_root + '/users/update_many.json'
+        self._api_users_show_many = client.api_root + '/users/show_many.json'
+        self._api_users_destroy_many = client.api_root + '/users/destroy_many.json'
+        self._api_user_identities = client.api_root + '/users/{user_id}/identities.json'
+        self._api_user_identity = client.api_root + '/users/{user_id}/identities/{id}.json'
+        self._api_user_identity_make_primary = client.api_root + '/users/{user_id}/identities/{id}/make_primary'
+        self._api_user_identity_verify = client.api_root + '/users/{user_id}/identities/{id}/verify'
+        self._api_user_identity_request_verification = \
             client.api_root + '/users/{user_id}/identities/{id}/request_verification.json'
-        self.api_user_groups = client.api_root + '/users/{user_id}/groups.json'
-        self.api_user_group_memberships = client.api_root + '/users/{user_id}/group_memberships.json'
-        self.api_user_group_membership = client.api_root + '/users/{user_id}/group_memberships/{id}.json'
-        self.api_user_group_membership_make_default = \
+        self._api_user_groups = client.api_root + '/users/{user_id}/groups.json'
+        self._api_user_group_memberships = client.api_root + '/users/{user_id}/group_memberships.json'
+        self._api_user_group_membership = client.api_root + '/users/{user_id}/group_memberships/{id}.json'
+        self._api_user_group_membership_make_default = \
             client.api_root + '/users/{user_id}/group_memberships/{membership_id}/make_default.json'
-        self.api_user_organizations = client.api_root + '/users/{user_id}/organizations.json'
-        self.api_user_organization_subscriptions = client.api_root + '/users/{user_id}/organization_subscriptions.json'
-        self.api_user_organization_memberships = client.api_root + '/users/{user_id}/organization_memberships.json'
-        self.api_user_organization_membership = client.api_root + '/users/{user_id}/organization_memberships/{id}.json'
-        self.api_user_organization_membership_make_default = \
+        self._api_user_organizations = client.api_root + '/users/{user_id}/organizations.json'
+        self._api_user_organization_subscriptions = client.api_root + '/users/{user_id}/organization_subscriptions.json'
+        self._api_user_organization_memberships = client.api_root + '/users/{user_id}/organization_memberships.json'
+        self._api_user_organization_membership = client.api_root + '/users/{user_id}/organization_memberships/{id}.json'
+        self._api_user_organization_membership_make_default = \
             client.api_root + '/users/{user_id}/organization_memberships/{id}/make_default.json'
-        self.user_tags = client.api_root + '/users/{id}/tags.json'
+        self._api_user_tags = client.api_root + '/users/{id}/tags.json'
+
+    def get(self, user_id, user_ids=None, filter_by_role=None):
+        if user_id:
+            return self.client._get(self._api_user.format(id=user_id))
+        if user_ids:
+            return self.client._get(self._api_users_show_many, querystring={'ids': ','.join(user_ids)})
+        if filter_by_role:
+            return self.client._get(self._api_users, querystring={'role': filter_by_role})
+        return self.client._get(self._api_users)
 
 
 class ZenDeskCoreSuspendedTickets:
@@ -203,8 +238,14 @@ class ZenDeskCoreTags:
     def __init__(self, client, parent):
         self.client = client
         self.parent = parent
-        self.api_tags = client.api_root + '/tags.json'
-        self.autocomplete_tags = client.api_root + '/autocomplete/tags.json'
+        self._api_tags = client.api_root + '/tags.json'
+        self._api_autocomplete_tags = client.api_root + '/autocomplete/tags.json'
+
+    def get(self):
+        return self.client._get(self._api_tags)
+
+    def autocomplete(self, prefix):
+        return self.client._get(self._api_autocomplete_tags, querystring={'name': prefix})
 
 
 class ZenDeskCoreTopics:
@@ -500,4 +541,12 @@ class ZenDeskClient:
 
     def _put(self, uri, json):
         response = requests.put(uri, json=json, auth=self.auth)
+        return response
+
+    def _delete(self, uri, json):
+        response = requests.delete(uri, json=json, auth=self.auth)
+        return response
+
+    def _post(self, uri, json):
+        response = requests.post(uri, json=json, auth=self.auth)
         return response
