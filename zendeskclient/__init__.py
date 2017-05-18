@@ -80,6 +80,13 @@ class ZenDeskCoreOrganizations:
             client.api_root + '/organizations/{organization_id}/organization_memberships.json'
         self._api_organization_tags = client.api_root + '/organizations/{id}/tags.json'
 
+    def get(self, organization_id=None, organization_ids=None):
+        if organization_id:
+            return self.client._get(self._api_organization.format(id=organization_id))
+        if organization_ids:
+            return self.client._get(self._api_organizations_show_many, querystring={'ids': ','.join(organization_ids)})
+        return self.client._get(self._api_organizations)
+
 
 class ZenDeskCoreUsers:
     def __init__(self, client, parent):
