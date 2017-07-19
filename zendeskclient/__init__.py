@@ -369,6 +369,10 @@ class ZenDeskHelpCenterSections:
     def get_articles(self, section_id):
         return self.client._get(self._api_hc_section_articles.format(section_id=section_id))
 
+    def create_article(self, section_id, data):
+        article_data = {"article": data}
+        return self.client._post(self._api_hc_section_articles.format(section_id=section_id), article_data)
+
     def get_subscriptions(self, section_id):
         return self.client._get(self._api_hc_section_subscriptions.format(section_id=section_id))
 
