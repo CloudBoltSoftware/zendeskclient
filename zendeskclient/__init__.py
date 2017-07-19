@@ -413,7 +413,7 @@ class ZenDeskHelpCenterArticles:
         return self.client._get(self._api_hc_articles)
 
     def update(self, article_id, updates):
-        return self.client._put(self._api_hc_article.format(id=article_id), data=updates)
+        return self.client._put(self._api_hc_article.format(id=article_id), json=updates)
 
     def get_translations(self, article_id, locale=None):
         if locale:
