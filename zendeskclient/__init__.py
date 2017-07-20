@@ -444,6 +444,12 @@ class ZenDeskHelpCenterArticles:
             return self.client._get(self._api_hc_labels.format(id=label_id))
         return self.client._get(self._api_hc_labels)
 
+    def create_label(self, article_id, label):
+        return self.client._post(
+            self._api_hc_article_labels.format(id=article_id),
+            json={"label": {"name": label}},
+        )
+
     def get_comment(self, article_id, comment_id):
         return self.client._get(self._api_hc_article_comment.format(article_id=article_id, id=comment_id))
 
