@@ -444,6 +444,12 @@ class ZenDeskHelpCenterArticles:
             return self.client._get(self._api_hc_labels.format(id=label_id))
         return self.client._get(self._api_hc_labels)
 
+    def create_label(self, article_id, label):
+        return self.client._post(
+            self._api_hc_article_labels.format(id=article_id),
+            json={"label": {"name": label}},
+        )
+
     def get_comment(self, article_id, comment_id):
         return self.client._get(self._api_hc_article_comment.format(article_id=article_id, id=comment_id))
 
@@ -461,7 +467,6 @@ class ZenDeskHelpCenterArticles:
 
     def get_attachment(self, attachment_id):
         return self.client._get(self._api_hc_article_attachment.format(id=attachment_id))
-
 
 
 class ZenDeskHelpCenterUsers:
@@ -501,7 +506,7 @@ class ZenDeskCommunityTopics:
         self.api_c_topic_posts = parent.api_c + '/topics/{id}/posts.json'
         self.api_c_topic_subscriptions = parent.api_c + '/topics/{topic_id}/subscriptions.json'
         self.api_c_topic_subscription = parent.api_c + '/topics/{topic_id}/subscriptions/{id}.json'
-        
+
 
 class ZenDeskCommunityPosts:
     def __init__(self, client, parent):
@@ -522,7 +527,7 @@ class ZenDeskCommunityUsers:
         self.api_c_user_posts = parent.api_c + '/users/{id}/posts.json'
         self.api_c_user_comments = parent.api_c + '/users/{id}/comments.json'
 
-        
+
 class ZenDeskCommunity:
     def __init__(self, client):
         self.client = client
