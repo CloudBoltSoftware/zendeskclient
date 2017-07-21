@@ -85,7 +85,10 @@ class ZenDeskCoreOrganizations:
             return self.client._get(self._api_organization.format(id=organization_id))
         if organization_ids:
             return self.client._get(self._api_organizations_show_many, querystring={'ids': ','.join(organization_ids)})
-        return self.client._get(self._api_organizations)
+        return self.get_all()
+
+    def get_all(self):
+        return self.client._get_all(self._api_organizations, collection="organizations")
 
 
 class ZenDeskCoreUsers:
@@ -561,3 +564,12 @@ class ZenDeskClient:
     def _post(self, uri, json):
         response = requests.post(uri, json=json, auth=self.auth)
         return response
+
+    def _get_all(self, uri, collection):
+        response_json = self._get(uri)
+        ret_data = response_json.copy()
+        while 'next_page' in response_json and response_json['next_page']:
+            response_json = self._get(response_json['next_page'])
+            ret_data[collection].extend(response_json[collection])
+        ret_data['next_page'] = None
+        return ret_data
