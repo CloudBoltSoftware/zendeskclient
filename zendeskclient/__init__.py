@@ -584,12 +584,12 @@ class ZenDeskClient:
         if not password:
             self.username = '{}/token'.format(self.username)
             self.token = token
-        self.password = password
+            self.auth = (self.username, self.token)
+        if password:
+            self.password = password
+            self.auth = (self.username, self.password)
         self.endpoint = endpoint
         self.locale = 'en'
-        if not self.password:
-            self.username = ''
-        self.auth = ('{}/token'.format(self.username), self.token)
         self.api_root = 'https://{}/api/v2'.format(self.endpoint)
 
         self.help_center = ZenDeskHelpCenter(self)
