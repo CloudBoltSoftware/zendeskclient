@@ -3,6 +3,13 @@ zendeskclient
 
 A lightweight ZenDesk REST API client written in Python.
 
+Usage
+=====
+
+    from zendeskclient import ZenDeskClient
+    client = ZenDeskClient('bob.smith@acme.com', 'acme-software.zendesk.com', password='hunter2')
+    all_tickets = client.core.tickets.get()
+
 LICENSE
 =======
 MIT License

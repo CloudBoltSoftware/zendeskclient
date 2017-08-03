@@ -541,36 +541,84 @@ class ZenDeskCommunity:
 
 
 class ZenDeskClient:
-    def __init__(self, api_uid, api_token, api_endpoint):
-        self.api_uid = api_uid
-        self.api_token = api_token
-        self.api_endpoint = api_endpoint
+    """A REST API client for ZenDesk.
+
+    To use this client, instantiate it, then make calls to the `help_center`, `community`, or `core` properties of the
+    instance, which each contain methods and sub-classes for the various API calls and API endpoints, organized by type
+    of endpoint being accessed (e.g. tickets, users, posts, etc).
+
+    Attributes:
+        username (str): Your ZenDesk username used to connect to the ZenDesk API.
+        endpoint (str): Your ZenDesk instance URI, e.g. acme-software.zendesk.com.
+        password (str): Your ZenDesk user password used to authenticate to the API.
+        token (str): A token on your ZenDesk instance used to authenticate to the API if password is not provided.
+            During initialization, '/token' will automatically be added to your username.
+        locale (str): The language locale used for articles. Set to 'en' on instantiation.
+        auth (str): The two-tuple of (username_or_username/token, password_or_token) passed to the requests module.
+        api_root (str): 'https://{{endpoint}}/api/v2'
+        help_center (ZenDeskHelpCenter): The API wrapper object for the ZenDesk Help Center API.
+        community (ZenDeskCommunity): The API wrapper object for the ZenDesk Community API.
+        core (ZenDeskCore): The Api wrapper object for the ZenDesk Core API.
+    """
+    def __init__(self, username, endpoint, password=None, token=None):
+        """Initialize the ZenDeskClient.
+        
+        Either token or password are required. If both are passed, password will be used. If token is used, /token
+        will be appended to api_uid automatically.
+        
+        Args:
+            username (str): The ZenDesk username used to connect to the ZenDesk API. If `token` is used to authenticate,
+                '/token' will be automatically appended to this during connection.
+            endpoint (str): The ZenDesk URI for your instance, e.g. acme-software.zendesk.com. Always uses HTTPS.
+            password (str): The user password for username.
+            token (str): The user API token.
+
+        Raises:
+            Exception: if neither token nor password are provided.
+
+        Returns: nothing
+        """
+        self.username = username
+        if not token and not password:
+            raise Exception("token or password must be provided, but neither were")
+        if not password:
+            self.username = '{}/token'.format(self.username)
+            self.token = token
+        self.password = password
+        self.endpoint = endpoint
         self.locale = 'en'
-        self.auth = ('{}/token'.format(self.api_uid), self.api_token)
-        self.api_root = 'https://{}/api/v2'.format(self.api_endpoint)
+        if not self.password:
+            self.username = ''
+        self.auth = ('{}/token'.format(self.username), self.token)
+        self.api_root = 'https://{}/api/v2'.format(self.endpoint)
 
         self.help_center = ZenDeskHelpCenter(self)
         self.community = ZenDeskCommunity(self)
         self.core = ZenDeskCore(self)
 
     def _get(self, uri, querystring=None):
+        """Perform a GET against against a ZenDesk API uri w/ optional querystring dict, returns raw response object."""
         _querystring = querystring.copy() if querystring else {}
         response = requests.get(uri, params=_querystring, auth=self.auth)
         return response.json()
 
     def _put(self, uri, json):
+        """Perform a PUT against a ZenDesk API uri with a json dict payload, returns raw response object."""
         response = requests.put(uri, json=json, auth=self.auth)
         return response
 
     def _delete(self, uri, json):
+        """Perform a DELETE against a ZenDesk API uri with a json dict payload, returns raw response object."""
         response = requests.delete(uri, json=json, auth=self.auth)
         return response
 
     def _post(self, uri, json):
+        """Perform a POST against a ZenDesk API uri with a json dict payload, returns raw response object."""
         response = requests.post(uri, json=json, auth=self.auth)
         return response
 
     def _get_all(self, uri, collection):
+        """Perform self.get() for each page in a collection, returning a full list of all returned results."""
         response_json = self._get(uri)
         ret_data = response_json.copy()
         while 'next_page' in response_json and response_json['next_page']:
